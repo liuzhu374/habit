@@ -112,16 +112,6 @@ npm run install-app     # 打包并安装到 /Applications/Habit.app
 
 编辑内容时，也可以直接**粘贴截图**，或者把图片和 PDF 拖进编辑框。单个文件最大 50 MB。
 
-一个 `.md` 文件可以一次放很多条：
-
-```markdown
-# 切比雪夫不等式
-$$P(|X-\mu|\ge k)\le \frac{\sigma^2}{k^2}$$
-
-# 马尔可夫不等式
-对非负随机变量 $X$：$P(X\ge a)\le \E[X]/a$
-```
-
 ## 数据与备份
 
 所有数据都保存在本机：
@@ -135,15 +125,6 @@ $$P(|X-\mu|\ge k)\le \frac{\sigma^2}{k^2}$$
 
 在「资料库 → 设置与备份」里可以导出备份、从备份恢复，或者在访达中打开这个文件夹。换电脑时，导出备份再在新电脑上恢复就可以了。如果有图片或 PDF，记得把 `uploads/` 文件夹一起复制过去。
 
-## 开发
-
-```bash
-npm install
-npm start          # 以开发模式运行
-npm test           # 运行调度算法的测试
-npm run build      # 打包到 dist/
-npm run zip        # 打包并压缩成可以分发的 zip
-```
 
 项目结构：
 
@@ -156,14 +137,6 @@ public/            界面（原生 JavaScript，不需要构建）
 build/             App 图标
 test/              测试
 ```
-
-## 致谢
-
-- [FSRS](https://github.com/open-spaced-repetition/fsrs4anki)：记忆调度算法
-- [KaTeX](https://katex.org/)：公式渲染
-- [marked](https://marked.js.org/)：Markdown 解析
-- [Electron](https://www.electronjs.org/)：桌面 App 外壳
-
 ## 许可
 
 [MIT](LICENSE)
