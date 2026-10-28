@@ -1,0 +1,25 @@
+{
+  "name": "habit",
+  "productName": "Habit",
+  "version": "1.0.0",
+  "description": "每日一记 —— 学习前的间隔重复小卡片",
+  "type": "module",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/",
+    "build": "electron-packager . Habit --platform=darwin --arch=$(node -p process.arch) --icon=build/icon.icns --app-bundle-id=local.habit.app --app-category-type=public.app-category.education --out=dist --overwrite --ignore='^/(dist|test|build|data|docs)($|/)' && codesign --force --deep --sign - dist/Habit-darwin-$(node -p process.arch)/Habit.app",
+    "install-app": "npm run build && rm -rf /Applications/Habit.app && cp -R dist/Habit-darwin-$(node -p process.arch)/Habit.app /Applications/",
+    "zip": "npm run build && ditto -c -k --keepParent dist/Habit-darwin-$(node -p process.arch)/Habit.app dist/Habit-mac-$(node -p process.arch).zip"
+  },
+  "dependencies": {
+    "katex": "^0.19.1",
+    "marked": "^18.1.2"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^45.1.0"
+  },
+  "license": "MIT"
+}

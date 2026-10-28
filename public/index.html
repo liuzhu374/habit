@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habit</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#/">
+      <img src="/icon.svg" alt="" width="28" height="28">
+      <span>Habit</span>
+    </a>
+    <nav>
+      <a href="#/" data-nav="today">今日</a>
+      <a href="#/library" data-nav="library">资料库</a>
+    </nav>
+  </header>
+  <main id="main"></main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="file-input" multiple hidden>
+  <dialog id="dialog"></dialog>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
