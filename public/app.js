@@ -1,4 +1,4 @@
-import { renderRich, enhance } from './render.js';
+import { renderRich, renderInline, enhance } from './render.js';
 import { SAMPLES } from './samples.js';
 
 const main = document.getElementById('main');
@@ -172,8 +172,8 @@ function renderReview(v, { item, reason, previews, stats }) {
   main.innerHTML = `${hello(stats, line)}
     <article class="card review">
       <div class="card-top"><span class="chip c-${color}">${label}</span>${subjectChip(item.subject)}</div>
-      <h2 class="title">${esc(item.title)}</h2>
-      ${item.prompt ? `<p class="prompt">${esc(item.prompt)}</p>` : ''}
+      <h2 class="title">${renderInline(item.title)}</h2>
+      ${item.prompt ? `<p class="prompt">${renderInline(item.prompt)}</p>` : ''}
       <div class="front-hint">
         <div class="think">💭</div>
         <p>先别急着翻——在脑海里或草稿纸上把它完整回想一遍</p>
@@ -322,7 +322,7 @@ function itemRow(i) {
     : `<span class="meter" title="当前记忆度 ${m}%"><i class="${m < 60 ? 'bad' : m < 85 ? 'low' : ''}" style="width:${m}%"></i></span>`;
   const cls = i.paused ? '' : i.meta.state === 'due' ? 'hot' : i.meta.state === 'new' ? 'new' : '';
   return `<li><a class="row ${i.paused ? 'paused' : ''}" href="#/edit/${i.id}">
-    <div class="row-main"><span class="row-title">${esc(i.title)}</span>${subjectChip(i.subject)}</div>
+    <div class="row-main"><span class="row-title">${renderInline(i.title)}</span>${subjectChip(i.subject)}</div>
     <div class="row-side">${meter}<span class="due-label ${cls}">${i.meta.dueLabel}</span></div>
   </a></li>`;
 }
@@ -489,8 +489,8 @@ async function showEditor(v, id) {
       <a class="link" href="#/library">← 返回资料库</a>
     </section>
     <form class="card editor" autocomplete="off">
-      <label class="field"><span>标题</span>
-        <input class="text title-input" name="title" placeholder="例如：正态分布的概率密度函数" value="${esc(item.title)}"></label>
+      <label class="field"><span>标题 <small>· 可以用 $…$ 写公式</small></span>
+        <input class="text title-input" name="title" placeholder="例如：$N(\\mu,\\sigma^2)$ 的概率密度函数" value="${esc(item.title)}"></label>
       <div class="two">
         <label class="field"><span>科目</span>
           <input class="text" name="subject" list="subject-list" placeholder="例如：概率论" value="${esc(item.subject)}"></label>
@@ -528,7 +528,12 @@ async function showEditor(v, id) {
   let timer;
 
   const drawPreview = () => {
-    preview.innerHTML = textarea.value.trim() ? renderRich(textarea.value) : '';
+    const title = form.title.value.trim();
+    const prompt = form.prompt.value.trim();
+    const head = title || prompt
+      ? `<div class="pv-head">${title ? `<div class="pv-title">${renderInline(title)}</div>` : ''}${prompt ? `<div class="pv-prompt">${renderInline(prompt)}</div>` : ''}</div>`
+      : '';
+    preview.innerHTML = head + (textarea.value.trim() ? renderRich(textarea.value) : '');
     enhance(preview, { embedPdf: false });
   };
   drawPreview();

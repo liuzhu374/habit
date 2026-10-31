@@ -32,6 +32,17 @@ export function renderRich(src = '') {
   });
 }
 
+const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+/** 单行文字（标题、提示）：只渲染公式，其余按纯文本显示；$$…$$ 也按行内公式排版。 */
+export function renderInline(src = '') {
+  const math = [];
+  let text = src;
+  for (const [re] of MATH) text = text.replace(re, (_, tex) => `⟦M${math.push(tex) - 1}⟧`);
+  return escapeHtml(text).replace(/⟦M(\d+)⟧/g, (_, i) =>
+    katex.renderToString(math[i], { throwOnError: false, strict: 'ignore', macros: { ...MACROS } }));
+}
+
 /** 渲染后处理：链接新窗口打开；PDF 链接下方嵌入阅读器。 */
 export function enhance(root, { embedPdf = true } = {}) {
   for (const a of root.querySelectorAll('a[href]')) {

@@ -329,6 +329,10 @@ input.title-input { font-size: 20px; font-weight: 600; }
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
 .split textarea { min-height: 420px; resize: vertical; font: 14.5px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .split .preview { padding: 14px 18px; border: 1px dashed var(--line); border-radius: 12px; min-height: 420px; overflow: auto; }
+.pv-head { padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1.5px dashed var(--line); }
+.pv-title { font-size: 20px; font-weight: 700; line-height: 1.4; }
+.pv-prompt { color: var(--muted); font-size: 15px; margin-top: 2px; }
+.row-title .katex { font-size: 1.05em; }
 .preview:empty::before { content: "预览会显示在这里"; color: var(--muted); }
 .tools { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 8px; font-size: 13px; color: var(--muted); }
 
