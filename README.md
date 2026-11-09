@@ -24,9 +24,16 @@
 - **资料随便放**：可以写文字，也可以粘贴截图、插入 PDF，或者批量导入 `.md` 文件
 - **完全本地**：数据只保存在你自己的电脑上，不需要注册，也不联网
 - **轻松但简洁**：浅色 / 深色模式自动切换
-- **Mac 和安卓都能用**
+- **Mac、Windows、安卓都能用**
 
 ## 安装
+
+### Windows
+
+1. 到 [Releases](https://github.com/liuzhu374/habit/releases/latest) 下载 `Habit-windows-x64.zip`（Windows 10 / 11，64 位）
+2. 解压到任意位置（比如 `D:\Habit`），双击里面的 **Habit.exe** 就能用，不需要安装。可以右键 Habit.exe →「发送到 → 桌面快捷方式」
+3. 第一次打开时，如果出现蓝色的「Windows 已保护你的电脑」，这是因为 App 没有购买代码签名证书。点「更多信息」→「仍要运行」即可
+4. 以后更新：用新版本的文件夹替换旧的，数据不受影响
 
 ### 安卓
 
@@ -76,7 +83,7 @@ npm run install-app     # 打包并安装到 /Applications/Habit.app
 
 每个按钮下方会直接显示“几天后再见”。打完分以后，可以「再来一个」，也可以「去学习吧」。
 
-**快捷键**（Mac）：`空格` 翻开 · `1` `2` `3` 打分 · `N` 再来一个
+**快捷键**（电脑）：`空格` 翻开 · `1` `2` `3` 打分 · `N` 再来一个 · 编辑时 `⌘S` / `Ctrl+S` 保存
 
 ### 它怎么决定复习哪一条
 
@@ -122,19 +129,28 @@ npm run install-app     # 打包并安装到 /Applications/Habit.app
 
 ## 数据与备份
 
-所有数据都保存在本机：
+所有数据都保存在本机。Mac 上在 `~/Library/Application Support/Habit/data/`，Windows 上在 `%APPDATA%\Habit\data\`：
 
 ```
-~/Library/Application Support/Habit/data/
+data/
 ├── library.json   # 所有内容和复习记录
 ├── uploads/       # 图片和 PDF
 └── backups/       # 每天自动备份一份，保留 14 天
 ```
 
-在「资料库 → 设置与备份」里可以导出备份、从备份恢复，或者在访达中打开这个文件夹。换电脑时，导出备份再在新电脑上恢复就可以了。如果有图片或 PDF，记得把 `uploads/` 文件夹一起复制过去。
+在「资料库 → 设置与备份」里可以导出备份、从备份恢复，或者直接打开这个文件夹。换电脑时，导出备份再在新电脑上恢复就可以了。如果有图片或 PDF，记得把 `uploads/` 文件夹一起复制过去。
 
 安卓版的数据存在 App 自己的私有目录里，结构和 Mac 版一样，同样每天自动备份。点「导出」会打开系统分享面板，可以把备份存到云盘、发给自己，或者传到另一台设备上恢复。目前备份文件里只有文字内容和复习记录，**不包含图片和 PDF**，所以在 Mac 和安卓之间迁移时，带图片的卡片需要重新插入图片。
 
+
+### 构建 Windows 版
+
+在 Mac 上也能打 Windows 包，不需要 Windows 电脑：
+
+```bash
+npm install
+npm run zip-win        # 生成 dist/Habit-windows-x64.zip
+```
 
 ### 构建安卓版
 
@@ -159,11 +175,11 @@ npm run android        # 生成 dist/Habit-android.apk
 项目结构：
 
 ```
-electron/main.js   Mac App 外壳：启动内置服务，打开窗口
-server.js          Mac 版内置本地服务（只监听 127.0.0.1 的随机端口）
-lib/api.js         API 逻辑（Mac 和安卓共用）
+electron/main.js   电脑版（Mac / Windows）外壳：启动内置服务，打开窗口
+server.js          电脑版内置本地服务（只监听 127.0.0.1 的随机端口）
+lib/api.js         API 逻辑（电脑版和安卓共用）
 lib/srs.js         FSRS 调度、选卡逻辑、统计
-lib/store.js       Mac 版数据读写：原子写入 + 每日备份
+lib/store.js       电脑版数据读写：原子写入 + 每日备份
 public/            界面（原生 JavaScript，不需要构建）
 public/native.js   安卓版的本地后端：数据存储、图片、PDF（pdf.js）、返回键
 android/           安卓工程（Capacitor）

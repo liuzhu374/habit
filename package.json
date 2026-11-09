@@ -1,7 +1,7 @@
 {
   "name": "habit",
   "productName": "Habit",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "每日一记 —— 学习前的间隔重复小卡片",
   "type": "module",
   "main": "electron/main.js",
@@ -12,7 +12,9 @@
     "build": "electron-packager . Habit --platform=darwin --arch=$(node -p process.arch) --icon=build/icon.icns --app-bundle-id=local.habit.app --app-category-type=public.app-category.education --out=dist --overwrite --ignore='^/(dist|test|build|data|docs|android|www|scripts|capacitor\\.config\\.json)($|/)' && codesign --force --deep --sign - dist/Habit-darwin-$(node -p process.arch)/Habit.app",
     "install-app": "npm run build && rm -rf /Applications/Habit.app && cp -R dist/Habit-darwin-$(node -p process.arch)/Habit.app /Applications/",
     "zip": "npm run build && ditto -c -k --keepParent dist/Habit-darwin-$(node -p process.arch)/Habit.app dist/Habit-mac-$(node -p process.arch).zip",
-    "android": "node scripts/build-web.mjs && cap sync android && cd android && ./gradlew assembleRelease && mkdir -p ../dist && cp app/build/outputs/apk/release/app-release.apk ../dist/Habit-android.apk"
+    "android": "node scripts/build-web.mjs && cap sync android && cd android && ./gradlew assembleRelease && mkdir -p ../dist && cp app/build/outputs/apk/release/app-release.apk ../dist/Habit-android.apk",
+    "build-win": "electron-packager . Habit --platform=win32 --arch=x64 --icon=build/icon.ico --app-copyright=\"MIT License\" --win32metadata.ProductName=Habit --win32metadata.FileDescription=Habit --win32metadata.CompanyName=Habit --out=dist --overwrite --ignore='^/(dist|test|build|data|docs|android|www|scripts|capacitor\\.config\\.json)($|/)'",
+    "zip-win": "npm run build-win && cd dist && rm -f Habit-windows-x64.zip && ditto -c -k --keepParent Habit-win32-x64 Habit-windows-x64.zip"
   },
   "dependencies": {
     "katex": "^0.19.1",

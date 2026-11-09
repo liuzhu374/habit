@@ -29,7 +29,8 @@ function nodeRoutes() {
     ...createRoutes(store),
 
     'POST /api/open-data': () => {
-      execFile('open', [store.dir]);
+      const opener = { darwin: 'open', win32: 'explorer' }[process.platform] || 'xdg-open';
+      execFile(opener, [store.dir]);
       return { ok: true };
     },
 

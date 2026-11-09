@@ -75,7 +75,9 @@ let prevHash = '#/';
 let currentHash = location.hash || '#/';
 let idleSince = 0; // “今日”页处于可安全刷新的状态（未翻开）的起始时间
 
-if (new URLSearchParams(location.search).has('app')) document.body.classList.add('mac-app');
+const APP = new URLSearchParams(location.search).get('app'); // mac / win / 空（浏览器、安卓）
+const IS_MAC = APP === 'mac' || (!APP && /Mac/.test(navigator.platform));
+if (APP === 'mac') document.body.classList.add('mac-app');
 if (native) document.body.classList.add('android-app');
 
 // 窗口一直开着（或 App 留在后台）、隔了很久再切回来时，重新挑一条
@@ -350,7 +352,7 @@ function settingsPanel(s, dataDir) {
           ? '<button class="btn ghost" data-act="export">导出</button>'
           : '<a class="btn ghost" href="/api/export" download>导出</a>'}<button class="btn ghost" data-act="restore">恢复</button></span></div>
       ${native ? '' : `<div class="setting"><span>数据位置<small>${esc(dataDir)}</small></span>
-        <button class="btn ghost" data-act="open-data">在访达中打开</button></div>`}
+        <button class="btn ghost" data-act="open-data">${IS_MAC ? '在访达中打开' : '打开文件夹'}</button></div>`}
     </div>
   </details>`;
 }
@@ -535,7 +537,7 @@ async function showEditor(v, id) {
           ${item.srs ? '<button type="button" class="btn ghost" data-act="reset">重置进度</button>' : ''}` : ''}
         <span class="spacer"></span>
         <button type="button" class="btn ghost" data-act="cancel">取消</button>
-        <button type="submit" class="btn primary">保存<kbd>⌘S</kbd></button>
+        <button type="submit" class="btn primary">保存<kbd>${IS_MAC ? '⌘S' : 'Ctrl+S'}</kbd></button>
       </div>
       ${item.srs ? `<p class="meta-line">已复习 ${item.srs.reps} 次 · 忘记 ${item.srs.lapses} 次 · 当前记忆度 ${item.meta.mastery}% · 下次：${item.meta.dueLabel}
         · <a class="link" href="#/review/${id}">现在复习一次 →</a></p>` : ''}
