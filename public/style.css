@@ -308,8 +308,9 @@ body.dragging .drop-hint { display: grid; }
 .editor-head h1 { margin: 0; font-size: 24px; }
 
 .field { display: block; margin-bottom: 16px; }
-.field > span { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
-.field > span small { font-weight: 400; }
+.field > span, .field > label > span { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.field > span small, .field > label > span small { font-weight: 400; }
+.field > .tools { margin-top: 6px; }
 input.text, textarea.text, .setting input {
   width: 100%;
   font: inherit;
@@ -333,12 +334,40 @@ input.title-input { font-size: 20px; font-weight: 600; }
 .pv-title { font-size: 20px; font-weight: 700; line-height: 1.4; }
 .pv-prompt { color: var(--muted); font-size: 15px; margin-top: 2px; }
 .row-title .katex { font-size: 1.05em; }
+
+/* 标题 / 提示里的图片：卡片上显示完整，列表里缩成小图 */
+img.inline-img { max-width: 100%; vertical-align: middle; border-radius: 10px; cursor: zoom-in; }
+.review .title img.inline-img, .pv-title img.inline-img { max-height: 280px; margin: 4px 0; }
+.review .prompt img.inline-img, .pv-prompt img.inline-img { max-height: 160px; margin: 2px 0; }
+.row-title img.inline-img { height: 1.7em; width: auto; border-radius: 5px; cursor: inherit; }
 .preview:empty::before { content: "预览会显示在这里"; color: var(--muted); }
 .tools { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 8px; font-size: 13px; color: var(--muted); }
 
 .editor-foot { display: flex; align-items: center; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
 .editor-foot .spacer { flex: 1; }
 .meta-line { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
+/* ---------- 安卓 ---------- */
+
+/* 触屏设备：不显示键盘快捷键提示，去掉悬停位移 */
+@media (hover: none) {
+  kbd { display: none; }
+  .row:hover, .rate-btn:hover { transform: none; box-shadow: none; }
+}
+body.android-app { -webkit-tap-highlight-color: transparent; }
+
+.pdf-pages { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.pdf-pages canvas { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.pdf-pages .muted { font-size: 14px; }
+
+.lightbox {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgb(0 0 0 / 88%);
+  overflow: auto;
+  display: grid; place-items: center;
+  animation: fade .2s ease;
+}
+.lightbox img { max-width: 100vw; max-height: 100vh; object-fit: contain; }
 
 /* ---------- 弹窗 & 提示 ---------- */
 

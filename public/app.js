@@ -1,5 +1,8 @@
-import { renderRich, renderInline, enhance } from './render.js';
+import { renderRich, renderInline, plainInline, enhance } from './render.js';
 import { SAMPLES } from './samples.js';
+
+// 安卓版没有内置服务器：数据读写由 native.js 在本地完成；Mac 版走 HTTP
+const native = window.Capacitor?.isNativePlatform?.() ? await import('./native.js').then((m) => m.init()) : null;
 
 const main = document.getElementById('main');
 const fileInput = document.getElementById('file-input');
@@ -12,6 +15,7 @@ const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const stripExt = (name) => name.replace(/\.[^.]+$/, '');
 
 async function api(url, { method = 'GET', body } = {}) {
+  if (native) return native.request(method, url, body);
   const res = await fetch(url, {
     method,
     headers: body ? { 'Content-Type': 'application/json' } : {},
@@ -23,6 +27,7 @@ async function api(url, { method = 'GET', body } = {}) {
 }
 
 async function upload(file) {
+  if (native) return native.upload(file);
   const res = await fetch('/api/upload', {
     method: 'POST',
     headers: { 'X-Filename': encodeURIComponent(file.name || 'pasted.png'), 'Content-Type': file.type || 'application/octet-stream' },
@@ -71,11 +76,14 @@ let currentHash = location.hash || '#/';
 let idleSince = 0; // “今日”页处于可安全刷新的状态（未翻开）的起始时间
 
 if (new URLSearchParams(location.search).has('app')) document.body.classList.add('mac-app');
+if (native) document.body.classList.add('android-app');
 
-// 窗口一直开着、隔了很久再切回来时，重新挑一条
-window.addEventListener('focus', () => {
+// 窗口一直开着（或 App 留在后台）、隔了很久再切回来时，重新挑一条
+const refreshIfIdle = () => {
   if (idleSince && Date.now() - idleSince > 30 * 60_000) route();
-});
+};
+window.addEventListener('focus', refreshIfIdle);
+document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && refreshIfIdle());
 
 function route() {
   prevHash = currentHash;
@@ -193,6 +201,8 @@ function renderReview(v, { item, reason, previews, stats }) {
     </article>`;
 
   const card = main.querySelector('.review');
+  enhance(card.querySelector('.title'));
+  if (item.prompt) enhance(card.querySelector('.prompt'));
   idleSince = Date.now();
   let revealed = false;
   let busy = false;
@@ -336,9 +346,11 @@ function settingsPanel(s, dataDir) {
       <label class="setting"><span>目标记忆率（%）<small>越高复习越频繁；推荐 90</small></span>
         <input type="number" name="retention" min="70" max="97" value="${Math.round(s.retention * 100)}"></label>
       <div class="setting"><span>备份<small>每天自动备份一份（保留 14 天）；也可以手动导出 / 恢复</small></span>
-        <span style="display:flex;gap:8px"><a class="btn ghost" href="/api/export" download>导出</a><button class="btn ghost" data-act="restore">恢复</button></span></div>
-      <div class="setting"><span>数据位置<small>${esc(dataDir)}</small></span>
-        <button class="btn ghost" data-act="open-data">在访达中打开</button></div>
+        <span style="display:flex;gap:8px">${native
+          ? '<button class="btn ghost" data-act="export">导出</button>'
+          : '<a class="btn ghost" href="/api/export" download>导出</a>'}<button class="btn ghost" data-act="restore">恢复</button></span></div>
+      ${native ? '' : `<div class="setting"><span>数据位置<small>${esc(dataDir)}</small></span>
+        <button class="btn ghost" data-act="open-data">在访达中打开</button></div>`}
     </div>
   </details>`;
 }
@@ -388,6 +400,7 @@ async function showLibrary(v) {
     else if (t.dataset.act === 'import') chooseFiles('.md,.markdown,.txt,.png,.jpg,.jpeg,.gif,.webp,.pdf', (files) => importFiles(v, files));
     else if (t.dataset.act === 'restore') chooseFiles('.json', (files) => importFiles(v, files));
     else if (t.dataset.act === 'open-data') api('/api/open-data', { method: 'POST' }).catch((err) => toast(err.message));
+    else if (t.dataset.act === 'export') native.exportBackup().catch((err) => toast(err.message));
   });
   main.querySelector('.settings').addEventListener('change', async (e) => {
     const { name, value } = e.target;
@@ -402,7 +415,8 @@ async function showLibrary(v) {
 }
 
 function chooseFiles(accept, onPick) {
-  fileInput.accept = accept;
+  // 安卓的文件选择器认不出 .md 这类扩展名，会把文件全部变灰；交给导入逻辑自己筛选
+  fileInput.accept = native ? (accept.split(',').every((a) => /^\.(png|jpe?g|gif|webp)$/.test(a)) ? 'image/*' : '') : accept;
   fileInput.value = '';
   fileInput.onchange = () => fileInput.files.length && onPick([...fileInput.files]);
   fileInput.click();
@@ -489,8 +503,14 @@ async function showEditor(v, id) {
       <a class="link" href="#/library">← 返回资料库</a>
     </section>
     <form class="card editor" autocomplete="off">
-      <label class="field"><span>标题 <small>· 可以用 $…$ 写公式</small></span>
-        <input class="text title-input" name="title" placeholder="例如：$N(\\mu,\\sigma^2)$ 的概率密度函数" value="${esc(item.title)}"></label>
+      <div class="field">
+        <label for="title-input"><span>标题 <small>· 可以用 $…$ 写公式，也可以放图片</small></span></label>
+        <input class="text title-input" id="title-input" name="title" placeholder="例如：$N(\\mu,\\sigma^2)$ 的概率密度函数" value="${esc(item.title)}">
+        <div class="tools">
+          <button type="button" class="link" data-act="title-image">🖼 给标题加图片</button>
+          <span>也可以把截图粘贴或拖到标题框里</span>
+        </div>
+      </div>
       <div class="two">
         <label class="field"><span>科目</span>
           <input class="text" name="subject" list="subject-list" placeholder="例如：概率论" value="${esc(item.subject)}"></label>
@@ -561,13 +581,33 @@ async function showEditor(v, id) {
     } catch (err) { toast(err.message); }
   };
 
-  textarea.addEventListener('paste', (e) => {
+  // 标题里的图片以 ![](/uploads/xxx.png) 的形式插在光标处，和公式一样可以与文字混排
+  const insertTitleImages = async (files) => {
+    const ok = files.filter((f) => /^image\//.test(f.type) || /\.(png|jpe?g|gif|webp)$/i.test(f.name));
+    if (!ok.length) return toast('标题里只能放图片');
+    const input = form.title;
+    try {
+      for (const f of ok) {
+        toast(`正在上传 ${f.name || '图片'}…`);
+        const { url } = await upload(f);
+        const { selectionStart: s, selectionEnd: e2, value } = input;
+        const pad = s > 0 && !/\s/.test(value[s - 1]) ? ' ' : '';
+        input.setRangeText(`${pad}![](${url})`, s, e2, 'end');
+      }
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      toast('已插入 ✨');
+    } catch (err) { toast(err.message); }
+  };
+
+  const pasteInto = (el, handler) => el.addEventListener('paste', (e) => {
     const files = [...e.clipboardData.files];
     if (!files.length) return;
     e.preventDefault();
-    insertFiles(files);
+    handler(files);
   });
-  dropHandler = (files) => insertFiles(files);
+  pasteInto(textarea, insertFiles);
+  pasteInto(form.title, insertTitleImages);
+  dropHandler = (files, e) => (e?.target?.closest?.('[name=title]') ? insertTitleImages(files) : insertFiles(files));
 
   const save = async () => {
     const body = { title: form.title.value, subject: form.subject.value, prompt: form.prompt.value, content: textarea.value };
@@ -592,8 +632,9 @@ async function showEditor(v, id) {
     if (!act) return;
     try {
       if (act === 'attach') chooseFiles('.png,.jpg,.jpeg,.gif,.webp,.pdf', insertFiles);
+      if (act === 'title-image') chooseFiles('.png,.jpg,.jpeg,.gif,.webp', insertTitleImages);
       if (act === 'cancel' && (!dirty || confirm('放弃没保存的修改？'))) back();
-      if (act === 'delete' && confirm(`确定删除「${item.title}」吗？`)) {
+      if (act === 'delete' && confirm(`确定删除「${plainInline(item.title)}」吗？`)) {
         await api(`/api/items/${id}`, { method: 'DELETE' });
         toast('已删除');
         location.hash = '#/library';

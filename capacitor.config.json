@@ -1,0 +1,8 @@
+{
+  "appId": "local.habit.app",
+  "appName": "Habit",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#FAF7F2"
+  }
+}
