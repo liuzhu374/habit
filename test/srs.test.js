@@ -6,9 +6,10 @@ const NOW = new Date(2026, 9, 27, 20, 0).getTime(); // 晚上 8 点
 const item = (id, srs = null, extra = {}) => ({ id, title: id, createdAt: 0, srs, ...extra });
 const reviewed = (id, rating, at) => preview(null, at, { seed: id })[rating].srs;
 
-test('新卡片：忘了 → 10 分钟，模糊 < 记得，到期时间对齐到学习日起点', () => {
+test('新卡片：忘了 → 立刻到期并标记优先，模糊 < 记得，到期时间对齐到学习日起点', () => {
   const p = preview(null, NOW);
-  assert.equal(p[Rating.Again].srs.due - NOW, 10 * 60_000);
+  assert.equal(p[Rating.Again].srs.due, NOW);
+  assert.equal(p[Rating.Again].srs.relearn, true);
   assert.ok(p[Rating.Hard].days >= 1);
   assert.ok(p[Rating.Good].days > p[Rating.Hard].days);
   assert.equal(p[Rating.Good].srs.due, startOfDay(NOW) + p[Rating.Good].days * DAY);
@@ -32,6 +33,23 @@ test('到期后“忘了”会降低稳定性并记一次遗忘', () => {
   const r = preview(srs, srs.due, { seed: 'a' })[Rating.Again].srs;
   assert.ok(r.stability < srs.stability);
   assert.equal(r.lapses, 1);
+});
+
+test('忘了的卡片下次排在所有到期内容前面，哪怕别的更快要忘', () => {
+  const forgot = preview(reviewed('f', Rating.Good, NOW - 5 * DAY), NOW, { seed: 'f' })[Rating.Again].srs;
+  const overdue = reviewed('o', Rating.Good, NOW - 60 * DAY); // 早就到期，回忆概率更低
+  const items = [item('o', overdue), item('f', forgot), item('new')];
+  assert.ok(retrievability(overdue, NOW + 1) < retrievability(forgot, NOW + 1));
+  assert.deepEqual(Object.values(pickNext(items, NOW + 1)).map((v) => v.id ?? v), ['f', 'relearn']);
+  // 这一次打开里已经跳过它（页面把答“忘了”的放进 skip）→ 先复习别的
+  assert.equal(pickNext(items, NOW + 1, { skip: ['f'] }).item.id, 'o');
+});
+
+test('忘了之后再答“记得”，优先标记清除，回到正常间隔', () => {
+  const forgot = preview(null, NOW)[Rating.Again].srs;
+  const r = preview(forgot, NOW + DAY, { seed: 'x' })[Rating.Good];
+  assert.equal(r.srs.relearn, undefined);
+  assert.ok(r.days >= 1 && r.srs.due > NOW + DAY);
 });
 
 test('预览与实际评分的结果一致（抖动是确定的）', () => {

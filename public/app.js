@@ -82,7 +82,9 @@ if (native) document.body.classList.add('android-app');
 
 // 窗口一直开着（或 App 留在后台）、隔了很久再切回来时，重新挑一条
 const refreshIfIdle = () => {
-  if (idleSince && Date.now() - idleSince > 30 * 60_000) route();
+  if (!idleSince || Date.now() - idleSince <= 30 * 60_000) return;
+  session.skip = []; // 隔了这么久算新的一次：之前跳过的、忘了的都可以再出现
+  route();
 };
 window.addEventListener('focus', refreshIfIdle);
 document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && refreshIfIdle());
@@ -137,6 +139,7 @@ document.addEventListener('drop', (e) => {
 // ---------- 今日 ----------
 
 const REASONS = {
+  relearn: ['上次忘了', 'rose', '上次没想起来，这次再试一次'],
   due: ['到期复习', 'coral', '它快要从记忆里溜走了，趁现在抓住它'],
   new: ['新内容', 'sky', '今天来认识一位新朋友'],
   ahead: ['提前巩固', 'mint', '到期的都复习完啦，再加固一条'],
@@ -155,7 +158,7 @@ const CHEERS = {
   3: ['记得牢牢的！', '大脑 +1 ✨', '稳稳拿下', '又进步了一点 🌱'],
 };
 
-const session = { skip: [] }; // 本次打开里“换一个”跳过的内容
+const session = { skip: [] }; // 本次打开里“换一个”跳过的、答“忘了”的内容
 
 function hello(stats, line = '开始学习之前，先热热身') {
   return `<section class="hello">
@@ -195,7 +198,7 @@ function renderReview(v, { item, reason, previews, stats }) {
         <div class="rate-btns">
           ${RATES.map(([g, face, text, c]) => `
             <button class="rate-btn c-${c}" data-rate="${g}">
-              <span class="face">${face}</span><b>${text}</b><small>${previews[g]}后再见</small>
+              <span class="face">${face}</span><b>${text}</b><small>${g === 1 ? '下次优先复习' : `${previews[g]}后再见`}</small>
             </button>`).join('')}
         </div>
       </div>
@@ -226,6 +229,7 @@ function renderReview(v, { item, reason, previews, stats }) {
     busy = true;
     try {
       const res = await api('/api/review', { method: 'POST', body: { id: item.id, rating: g } });
+      if (g === 1) session.skip.push(item.id); // 忘了的这条下次再来，这一次不马上重考
       if (v === viewId) renderDone(v, g, res);
     } catch (err) {
       busy = false;
@@ -258,7 +262,7 @@ function renderDone(v, g, { next, stats }) {
     <article class="card done">
       <div class="burst c-${color}">${g === 1 ? '↺' : '✓'}</div>
       <h2>${pick(CHEERS[g])}</h2>
-      <p>${g === 1 ? `<b>${next}</b>后它会再来找你` : `下次见面：<b>${next}后</b>`}</p>
+      <p>${g === 1 ? '下次打开时，它会<b>第一个</b>来找你' : `下次见面：<b>${next}后</b>`}</p>
       <div class="actions">
         <button class="btn ghost" data-act="more">再来一个<kbd>N</kbd></button>
         <button class="btn primary" data-act="finish">去学习吧 →</button>
