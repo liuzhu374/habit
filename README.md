@@ -3,8 +3,6 @@
 Before you start studying, spend one minute recalling a formula, a proof, or a fact.
 Habit uses a **spaced-repetition schedule** to pick the one card you most need to review right now.
 
-> The app's interface is in Chinese. Button names are given below in English with the Chinese label in parentheses.
-
 ## Features
 
 - **One card at a time**: open the app and you immediately see what to review, with no intimidating queue
@@ -51,15 +49,15 @@ All builds are on the [Releases](https://github.com/liuzhu374/habit/releases/lat
 
 1. Open Habit and read the **title** of today's card, plus the optional hint (e.g. "write down the mean and variance")
 2. **Recall the full answer** in your head or on scratch paper
-3. Tap **Reveal** (翻开看看), compare with the answer, and rate yourself:
+3. Tap **Reveal**, compare with the answer, and rate yourself:
 
 | Button | Meaning | Comes back |
 |---|---|---|
-| 😵‍💫 **Forgot** (忘了) | Couldn't recall it | First thing next time you open Habit |
-| 🤔 **Fuzzy** (模糊) | Recalled part of it | After a short gap |
-| 😎 **Got it** (记得) | Recalled all of it | After a growing gap: roughly 3 days → 11 days → 39 days → 4 months… |
+| 😵‍💫 **Forgot** | Couldn't recall it | First thing next time you open Habit |
+| 🤔 **Fuzzy** | Recalled part of it | After a short gap |
+| 😎 **Got it** | Recalled all of it | After a growing gap: roughly 3 days → 11 days → 39 days → 4 months… |
 
-Each button shows when the card will come back. **Forgot** has no fixed time: the card won't be asked again during the current session, and the next time you open Habit (reopen the window, or come back after more than 30 minutes) it is shown before anything else. After rating, choose **One more** (再来一个) or **Go study** (去学习吧).
+Each button shows when the card will come back. **Forgot** has no fixed time: the card won't be asked again during the current session, and the next time you open Habit (reopen the window, or come back after more than 30 minutes) it is shown before anything else. After rating, choose **One more** or **Go study**.
 
 **Keyboard shortcuts** (desktop): `Space` reveal · `1` `2` `3` rate · `N` one more · `⌘S` / `Ctrl+S` save while editing
 
@@ -71,13 +69,13 @@ Every card tracks a *stability* and a *difficulty*, from which Habit estimates *
 2. **If nothing is due**: a new card is introduced (at most 3 per day, configurable in settings)
 3. **If there are no new cards either**: the card you know least well, for extra practice
 
-**Skip** (换一个) only skips a card for the current session and does not affect its schedule.
+**Skip** only skips a card for the current session and does not affect its schedule.
 
 ### Adding cards
 
-In **Library** (资料库), click **＋ New** (新建) and fill in:
+In **Library**, click **＋ New** and fill in:
 
-- **Title**: the question you see first, e.g. "PDF of the normal distribution". It can contain math (`Gaussian integral $\int_{-\infty}^{\infty} e^{-x^2}\,dx$`) and images: click **Add image to title** (给标题加图片) below the field, or paste / drag a screenshot into it. Images appear in the title as `![](/uploads/…)` and can be mixed with text and formulas
+- **Title**: the question you see first, e.g. "PDF of the normal distribution". It can contain math (`Gaussian integral $\int_{-\infty}^{\infty} e^{-x^2}\,dx$`) and images: click **Add image to title** below the field, or paste / drag a screenshot into it. Images appear in the title as `![](/uploads/…)` and can be mixed with text and formulas
 - **Subject**: for grouping, e.g. "Probability"
 - **Hint** (optional): shown before revealing, e.g. "write the density, mean, and variance"; also supports math and images
 - **Content**: the answer, in Markdown and LaTeX
@@ -87,7 +85,7 @@ Built-in macros: `\R` `\N` `\Z` `\Q` `\C` (blackboard bold), `\E` `\P` (expectat
 
 ### Importing files
 
-In the library, click **Import** (导入文件) or drag files into the window:
+In the library, click **Import** or drag files into the window:
 
 | File | Result |
 |---|---|
@@ -111,7 +109,7 @@ data/
 └── backups/       # one automatic backup per day, kept for 14 days
 ```
 
-**Library → Settings & backup** (设置与备份) lets you export a backup, restore one, or open the data folder. To move to a new computer, export a backup and restore it there; if you have images or PDFs, copy the `uploads/` folder too.
+**Library → Settings & backup** lets you export a backup, restore one, or open the data folder. To move to a new computer, export a backup and restore it there; if you have images or PDFs, copy the `uploads/` folder too.
 
 On Android, data lives in the app's private storage with the same layout and the same daily backups. **Export** opens the system share sheet, so you can save the backup to cloud storage or send it to another device. Backups currently contain text and review history only, **not images or PDFs**, so cards with images need their images re-attached when moving between devices.
 
